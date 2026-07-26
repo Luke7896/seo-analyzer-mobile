@@ -1,18 +1,33 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { Stack, useRouter, useSegments } from "expo-router";
+import { AuthProvider, useAuth } from "../context/AuthContext";
+import { useEffect } from "react";
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+function RouteGuard({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const router = useRouter();
+  const segments = useSegments();
 
-SplashScreen.preventAutoHideAsync();
+  useEffect(() => {
+    if (loading) return;
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+    const inAuthGroup = segments[0] === "login" || segments[0] === "register";
+
+    if (!user && !inAuthGroup) {
+      router.replace("/login");
+    } else if (user && inAuthGroup) {
+      router.replace("/dashboard");
+    }
+  }, [user, loading, segments]);
+
+  return <>{children}</>;
+}
+
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <AuthProvider>
+      <RouteGuard>
+        <Stack />
+      </RouteGuard>
+    </AuthProvider>
   );
 }
