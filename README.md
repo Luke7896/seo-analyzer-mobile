@@ -1,4 +1,4 @@
-# Welcome to my Expo app 👋
+# Welcome to my Expo app 
 
 
 ## Video Demo
